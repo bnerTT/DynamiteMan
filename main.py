@@ -1,8 +1,8 @@
-import os
 import sys
 
 import pygame
 
+from core.gateways.graphic import Graphic
 from core.vos.gamestate import Gamestate
 from core.vos.walls import Wall
 
@@ -10,42 +10,16 @@ from core.vos.walls import Wall
 def main() -> None:
     pygame.init()
     gs = gen_gamestate()
-
-    scale = 64
-
-    screen_width, screen_height = gs.width * scale, gs.height * scale
-    screen = pygame.display.set_mode((screen_width, screen_height))
-    pygame.display.set_caption("DynamiteMan")
-
+    ge = Graphic(64, gs.width, gs.height)
     clock = pygame.time.Clock()
 
-    # hornet = pygame.image.load(os.path.join("./src/hornet.jpeg"))
-    empty = pygame.image.load(os.path.join("./src/empty.png"))
-    concrete = pygame.image.load(os.path.join("./src/concrete.png"))
-    box = pygame.image.load(os.path.join("./src/box.png"))
-
-    running = True
-    while running:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-
-        screen.fill("green")
-
-        for idy, row in enumerate(gs.grid_walls):
-            for idx, pos in enumerate(row):
-                if pos is Wall.CONCRETE:
-                    screen.blit(concrete, [idx * scale, idy * scale])
-                elif pos is Wall.BOX:
-                    screen.blit(box, [idx * scale, idy * scale])
-                elif pos is Wall.EMPTY:
-                    screen.blit(empty, [idx * scale, idy * scale])
-
-        pygame.display.flip()
-        clock.tick(60)  # Limita o loop a 60 FPS
-
-    pygame.quit()
-    sys.exit()
+                pygame.quit()
+                sys.exit()
+            ge.draw(gs)
+            clock.tick(60)
 
 
 def gen_gamestate() -> Gamestate:
