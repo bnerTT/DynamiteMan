@@ -4,6 +4,8 @@ from typing import Final
 import pygame
 
 # from core.vos.gamestate import Gamestate
+from core.entities.player import Player
+from core.vos.direction import Direction
 from core.vos.gamestate import Gamestate
 from core.vos.walls import Wall
 
@@ -15,17 +17,22 @@ EXPLOSION_SPRITE_PATH_BASE: Final = "./src/explosion"
 EXPLOSION_SPRITES_NUMBER = 10
 EXPLOSION_SPRITES_PER_TICK = 2
 
+PLAYER_SPRITE_PATH_BASE: Final = "./src/p1"
+
 
 class Graphic:
     wall_sprites: dict[Wall, pygame.Surface]
     fire_sprites: list[pygame.Surface]
+    player_sprites: dict[Direction, pygame.Surface]
+
+    temp_players: list[Player]
 
     screen: pygame.Surface
     scale: int = 64
 
     # Initialize the graphic engine, receives the numbers of columns and rows
     # that the current map uses.
-    def __init__(self, scale: int, rows: int, colums: int):
+    def __init__(self, scale: int, rows: int, colums: int, players: list[Player]):
         screen_width, screen_height = rows * scale, colums * scale
         self.screen = pygame.display.set_mode((screen_width, screen_height))
         self.scale = scale
@@ -36,11 +43,14 @@ class Graphic:
         self.wall_sprites[Wall.BOX] = pygame.image.load(BOX_SPRITE_PATH)
 
         self.load_explosion_sprites()
+        self.load_player_sprites()
+        self.temp_players = players
 
     def draw(self, gs: Gamestate):
         self.screen.fill("green")
         self.draw_grid(gs.grid_walls)
         self.draw_fire(gs.flames_grid)
+        self.draw_players(self.temp_players)
         pygame.display.flip()
 
     def draw_grid(self, walls: list[list[Wall]]):
@@ -65,6 +75,13 @@ class Graphic:
 
                 self.screen.blit(self.fire_sprites[frame_number], pos)
 
+    def draw_players(self, players: list[Player]):
+        for p in players:
+            pos = self.pos(p.pos.x, p.pos.y)
+            sprite = self.player_sprites[p.facing]
+
+            self.screen.blit(sprite, pos)
+
     def pos(self, x, y):
         return x * self.scale, y * self.scale
 
@@ -74,3 +91,10 @@ class Graphic:
         for n in range(1, EXPLOSION_SPRITES_NUMBER + 1):
             path = os.path.join(f"{EXPLOSION_SPRITE_PATH_BASE}{n}.png")
             self.fire_sprites.append(pygame.image.load(path))
+
+    def load_player_sprites(self):
+        self.player_sprites = {}
+
+        for d in [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]:
+            path = os.path.join(f"{PLAYER_SPRITE_PATH_BASE}{d}.png")
+            self.player_sprites[d] = pygame.image.load(path)

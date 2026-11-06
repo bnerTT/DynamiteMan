@@ -2,15 +2,18 @@ import sys
 
 import pygame
 
+from core.entities.player import Player
 from core.gateways.graphic import Graphic
+from core.vos.direction import Direction
 from core.vos.gamestate import Gamestate
+from core.vos.position import Position
 from core.vos.walls import Wall
 
 
 def main() -> None:
     pygame.init()
     gs = gen_gamestate()
-    ge = Graphic(64, gs.width, gs.height)
+    ge = Graphic(64, gs.width, gs.height, gen_players())
     clock = pygame.time.Clock()
 
     while True:
@@ -138,6 +141,26 @@ def gen_gamestate() -> Gamestate:
     gs.bombs = []
 
     return gs
+
+
+def gen_players() -> list[Player]:
+    p1 = Player()
+    p1.facing = Direction.UP
+    p1.pos = Position(5, 5)
+
+    p2 = Player()
+    p2.facing = Direction.LEFT
+    p2.pos = Position(5, 6)
+
+    p3 = Player()
+    p3.facing = Direction.RIGHT
+    p3.pos = Position(6, 5)
+
+    p4 = Player()
+    p4.facing = Direction.DOWN
+    p4.pos = Position(6, 6)
+
+    return [p1, p2, p3, p4]
 
 
 if __name__ == "__main__":

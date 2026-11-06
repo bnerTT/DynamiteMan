@@ -9,3 +9,5 @@ class Gamestate:
     grid_walls: list[list[Wall]]
     flames_grid: list[list[int]]  # ticks restantes de fogo por pos
     bombs: list[Bomb]
+    # players: list[Player]
+    # Removido por um import circular temporariamente.
