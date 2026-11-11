@@ -32,7 +32,7 @@ class Graphic:
 
     # Initialize the graphic engine, receives the numbers of columns and rows
     # that the current map uses.
-    def __init__(self, scale: int, rows: int, colums: int, players: list[Player]):
+    def __init__(self, scale: int, rows: int, colums: int):
         screen_width, screen_height = rows * scale, colums * scale
         self.screen = pygame.display.set_mode((screen_width, screen_height))
         self.scale = scale
@@ -44,13 +44,12 @@ class Graphic:
 
         self.load_explosion_sprites()
         self.load_player_sprites()
-        self.temp_players = players
 
     def draw(self, gs: Gamestate):
         self.screen.fill("green")
         self.draw_grid(gs.grid_walls)
         self.draw_fire(gs.flames_grid)
-        self.draw_players(self.temp_players)
+        self.draw_players(gs.players)
         pygame.display.flip()
 
     def draw_grid(self, walls: list[list[Wall]]):

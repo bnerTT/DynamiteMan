@@ -8,12 +8,14 @@ from core.vos.direction import Direction
 from core.vos.gamestate import Gamestate
 from core.vos.position import Position
 from core.vos.walls import Wall
+from core.controllers.human import Human
+from core.vos.action import Action
 
 
 def main() -> None:
     pygame.init()
     gs = gen_gamestate()
-    ge = Graphic(64, gs.width, gs.height, gen_players())
+    ge = Graphic(64, gs.width, gs.height)
     clock = pygame.time.Clock()
 
     while True:
@@ -21,16 +23,14 @@ def main() -> None:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            ge.draw(gs)
-            clock.tick(60)
+        ge.draw(gs)
+        clock.tick(60)
 
 
 def gen_gamestate() -> Gamestate:
-    gs = Gamestate()
-    gs.current_tick = 0
-    gs.width = 9
-    gs.height = 9
-    gs.grid_walls = [
+    width = 9
+    height = 9
+    grid_walls = [
         [
             Wall.EMPTY,
             Wall.EMPTY,
@@ -131,36 +131,43 @@ def gen_gamestate() -> Gamestate:
             Wall.EMPTY,
         ],
     ]
-    gs.flames_grid = [
-        [-1, 0, 1, 2],
-        [3, 4, 5, 6],
-        [7, 8, 9, 10],
-        [11, 12, 13, 14],
-        [15, 16, 17, 18, 19, 20],
+    flames_grid = [
+        [-1 for _ in range(width)]
+        for _ in range(height)
     ]
-    gs.bombs = []
+    
 
-    return gs
+    return Gamestate(
+        width=width,
+        height=height,
+        grid_walls=grid_walls,
+        flames_grid=flames_grid,
+        players=gen_players(),
+    )
 
 
 def gen_players() -> list[Player]:
-    p1 = Player()
-    p1.facing = Direction.UP
-    p1.pos = Position(5, 5)
+    starts = [
+        (1, Position(0, 0), Direction.RIGHT),
+        (2, Position(8, 0), Direction.LEFT),
+        (3, Position(0, 8), Direction.RIGHT),
+        (4, Position(8, 8), Direction.LEFT),
+    ]
+    
+    players = []
+    
+    for player_id, pos, facing in starts:
+        player = Player()
+        player.id = player_id
+        player.pos = pos
+        player.facing = facing
+        player.alive = True
+        player.speed = 1
+        player.bomb_capacity = 1
+        player.active_bombs = 0
+        players.append(player)
 
-    p2 = Player()
-    p2.facing = Direction.LEFT
-    p2.pos = Position(5, 6)
-
-    p3 = Player()
-    p3.facing = Direction.RIGHT
-    p3.pos = Position(6, 5)
-
-    p4 = Player()
-    p4.facing = Direction.DOWN
-    p4.pos = Position(6, 6)
-
-    return [p1, p2, p3, p4]
+    return players
 
 
 if __name__ == "__main__":

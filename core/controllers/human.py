@@ -2,7 +2,7 @@ import pygame
 
 from core.vos.action import Action
 from core.vos.gamestate import Gamestate
-from ports.controller import Controller
+from core.ports.controller import Controller
 
 
 class Human(Controller):
