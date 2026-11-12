@@ -8,10 +8,12 @@ from core.entities.player import Player
 from core.vos.direction import Direction
 from core.vos.gamestate import Gamestate
 from core.vos.walls import Wall
+from core.entities.bomb import Bomb
 
 EMPTY_SPRITE_PATH: Final = os.path.join("./src/empty.png")
 CONCRETE_SPRITE_PATH: Final = os.path.join("./src/concrete.png")
 BOX_SPRITE_PATH: Final = os.path.join("./src/box.png")
+BOMB_SPRITE_PATH: Final = os.path.join("./src/bomb.breno.png")
 
 EXPLOSION_SPRITE_PATH_BASE: Final = "./src/explosion"
 EXPLOSION_SPRITES_NUMBER = 10
@@ -30,8 +32,6 @@ class Graphic:
     screen: pygame.Surface
     scale: int = 64
 
-    # Initialize the graphic engine, receives the numbers of columns and rows
-    # that the current map uses.
     def __init__(self, scale: int, rows: int, colums: int):
         screen_width, screen_height = rows * scale, colums * scale
         self.screen = pygame.display.set_mode((screen_width, screen_height))
@@ -41,16 +41,25 @@ class Graphic:
         self.wall_sprites[Wall.EMPTY] = pygame.image.load(EMPTY_SPRITE_PATH)
         self.wall_sprites[Wall.CONCRETE] = pygame.image.load(CONCRETE_SPRITE_PATH)
         self.wall_sprites[Wall.BOX] = pygame.image.load(BOX_SPRITE_PATH)
-
+        
+        raw_bomb = pygame.image.load(BOMB_SPRITE_PATH)
+        self.bomb_sprite = pygame.transform.scale(raw_bomb, (self.scale, self.scale))
+        
         self.load_explosion_sprites()
         self.load_player_sprites()
 
     def draw(self, gs: Gamestate):
         self.screen.fill("green")
         self.draw_grid(gs.grid_walls)
+        self.draw_bombs(gs.bombs)
         self.draw_fire(gs.flames_grid)
         self.draw_players(gs.players)
         pygame.display.flip()
+        
+    def draw_bombs(self, bombs: list[Bomb]):
+        for b in bombs:
+            pos = self.pos(b.pos.x, b.pos.y)
+            self.screen.blit(self.bomb_sprite, pos)
 
     def draw_grid(self, walls: list[list[Wall]]):
         for idy, row in enumerate(walls):
@@ -69,16 +78,16 @@ class Graphic:
                 frame_number = abs(
                     (cf // EXPLOSION_SPRITES_PER_TICK) - EXPLOSION_SPRITES_NUMBER
                 )
-                ## Caps the frame_number to 9, because the number of sprites available.
                 frame_number = min(frame_number, 9)
 
                 self.screen.blit(self.fire_sprites[frame_number], pos)
 
     def draw_players(self, players: list[Player]):
         for p in players:
+            if not p.alive:
+                continue
             pos = self.pos(p.pos.x, p.pos.y)
             sprite = self.player_sprites[p.facing]
-
             self.screen.blit(sprite, pos)
 
     def pos(self, x, y):
