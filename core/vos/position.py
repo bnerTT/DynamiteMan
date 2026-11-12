@@ -3,8 +3,12 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Position:
-    x: int
-    y: int
+    x: float
+    y: float
 
-    def tuple(self) -> tuple[int, int]:
+    def grid(self) -> tuple[int,int]:
+        return round(self.x),round(self.y)
+    
+    def tuple(self) -> tuple[float, float]:
         return self.x, self.y
+    
