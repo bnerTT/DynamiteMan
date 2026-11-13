@@ -1,7 +1,5 @@
 # def clone() -> GameState
 # def reset_tick_cache()
-# def is_walkable(x, y) -> bool
-# def is_flame(x, y) -> bool
 import math
 
 from core.vos.action import Action
@@ -217,3 +215,38 @@ def update_gamestate(gs: Gamestate) -> None:
         px, py = player.pos.grid()
         if is_flame(gs, px, py):
             player.alive = False
+
+def clone(gs: Gamestate) -> Gamestate:
+    cloned_players: list[Player] = []
+    
+    for p in gs.players:
+        cpy = Player()
+        cpy.id = p.id
+        cpy.pos = p.pos
+        cpy.facing = p.facing
+        cpy.alive = p.alive
+        cpy.speed = p.speed
+        cpy.bomb_capacity = p.bomb_capacity
+        cpy.active_bombs = p.active_bombs
+        cpy.controller = p.controller
+        cloned_players.append(cpy)
+        
+    cloned_bombs: list[Bomb] = [
+        Bomb(
+            id=b.id,
+            owner_id=b.owner_id,
+            pos=b.pos,
+            fuse_ticks=b.fuse_ticks,
+            blast_radius=b.blast_radius,
+        ) for b in gs.bombs
+    ]
+    
+    return Gamestate(
+        width=gs.width,
+        height=gs.height,
+        grid_walls=[row[:] for row in gs.grid_walls],
+        flames_grid=[row[:] for row in gs.flames_grid],
+        current_tick=gs.current_tick,
+        bombs=cloned_bombs,
+        players=cloned_players
+    )
