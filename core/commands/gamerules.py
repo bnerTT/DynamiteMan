@@ -273,5 +273,7 @@ def clone(gs: Gamestate) -> Gamestate:
         flames_grid=[row[:] for row in gs.flames_grid],
         current_tick=gs.current_tick,
         bombs=cloned_bombs,
-        players=cloned_players
+        players=cloned_players,
+        game_over=gs.game_over,
+        winner_id=gs.winner_id
     )
