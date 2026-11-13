@@ -18,3 +18,5 @@ class Gamestate:
     current_tick: int = 0
     bombs: list[Bomb] = field(default_factory=list)
     players: list[Player] = field(default_factory=list)
+    game_over: bool = False
+    winner_id: int | None = None

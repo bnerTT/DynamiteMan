@@ -191,30 +191,55 @@ def plant_bomb(gs: Gamestate, player: Player) -> None:
     )
     player.active_bombs += 1
 
-
-def update_gamestate(gs: Gamestate) -> None:
+def apply_tick(gs: Gamestate, actions_by_player: dict[int, list[Action]]) -> None:
     gs.current_tick += 1
     
     process_fires(gs)
     process_bombs(gs)
     
+    someone_died = False
+    
     for player in gs.players:
         if not player.alive:
             continue
-        actions = player.controller.get_actions(gs, player.id)
+        
+        #Isso aqui é uma função que devolve o valor associado ao player.id, caso não seja cumprido o requisito, ou seja, não tenha nenhuma ação, ele devolve IDLE, que é ficar parado.
+        #Uma ação vai vir nessa estrutura: {PlayerId = 1: [ACTION = Action.IDLE]}
+        actions = actions_by_player.get(player.id, [Action.IDLE])
+        
         move_actions = [a for a in actions if a in MOVE_DELTAS]
+        
         move_actions.sort(key=lambda a: MOVE_DELTAS[a][2] == player.facing)
+        
         for action in move_actions:
             dx, dy, direction = MOVE_DELTAS[action]
             player.facing = direction
             if try_move(gs, player, dx, dy):
                 break
+            
         if Action.BOMB in actions:
             plant_bomb(gs, player)
             
         px, py = player.pos.grid()
         if is_flame(gs, px, py):
             player.alive = False
+            someone_died = True
+            
+    if someone_died:
+        alive_ids = [p.id for p in gs.players if p.alive]
+        if len(alive_ids) <= 1:
+            gs.game_over = True
+            gs.winner_id = alive_ids[0] if len(alive_ids) == 1 else None
+
+
+def update_gamestate(gs: Gamestate) -> None:
+    actions_by_player: dict[int, list[Action]] = {}
+    for player in gs.players:
+        if player.alive:
+            actions_by_player[player.id] = player.controller.get_actions(gs, player.id)
+            
+    apply_tick(gs, actions_by_player)
+
 
 def clone(gs: Gamestate) -> Gamestate:
     cloned_players: list[Player] = []

@@ -25,7 +25,12 @@ def main() -> None:
                 pygame.quit()
                 sys.exit()
                 
-        update_gamestate(gs)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                gs = gen_gamestate()
+                
+        if not gs.game_over:
+            update_gamestate(gs)
+                
         ge.draw(gs)
         clock.tick(60)
 
