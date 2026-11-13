@@ -41,6 +41,7 @@ class Graphic:
         self.wall_sprites[Wall.EMPTY] = pygame.image.load(EMPTY_SPRITE_PATH)
         self.wall_sprites[Wall.CONCRETE] = pygame.image.load(CONCRETE_SPRITE_PATH)
         self.wall_sprites[Wall.BOX] = pygame.image.load(BOX_SPRITE_PATH)
+        self.font = pygame.font.SysFont("Arial", 32, bold=True)
         
         raw_bomb = pygame.image.load(BOMB_SPRITE_PATH)
         self.bomb_sprite = pygame.transform.scale(raw_bomb, (self.scale, self.scale))
@@ -54,6 +55,13 @@ class Graphic:
         self.draw_bombs(gs.bombs)
         self.draw_fire(gs.flames_grid)
         self.draw_players(gs.players)
+        
+        if gs.game_over:
+            msg = f"Player {gs.winner_id} Venceu! (R = Reset)" if gs.winner_id else "Empate! (R = Reset)"
+            text_surface = self.font.render(msg, True, "white", "black")
+            rect = text_surface.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
+            self.screen.blit(text_surface, rect)
+        
         pygame.display.flip()
         
     def draw_bombs(self, bombs: list[Bomb]):
